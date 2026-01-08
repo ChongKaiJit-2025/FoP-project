@@ -5,91 +5,78 @@ import java.util.stream.Collectors;
 
 public class CalendarSystem {
     private List<Event> events;
+    private List<RecurrentEvent> recEvents;
 
     public CalendarSystem() {
         this.events = FileManager.loadEvents();
+        this.recEvents = FileManager.loadRecurrent();
     }
 
-    public List<Event> getAllEvents() {
-        return events;
+    // 合并所有事件（包括展开重复事件）
+    public List<Event> getAllEventsCombined() {
+        List<Event> all = new ArrayList<>(events);
+        for(RecurrentEvent re : recEvents) {
+            all.addAll(re.generateOccurrences());
+        }
+        all.sort(Comparator.comparing(Event::getStartDateTime));
+        return all;
     }
 
-    // 添加事件
-    public void addEvent(String title, String desc, LocalDateTime start, LocalDateTime end) {
-        int newId = generateNextId();
-        Event newEvent = new Event(newId, title, desc, start, end);
-        events.add(newEvent);
-        saveChanges();
-    }
-
-    // --- 修改事件 (Update) ---
-    public boolean updateEvent(int id, String newTitle, String newDesc, LocalDateTime newStart, LocalDateTime newEnd) {
-        for (Event e : events) {
-            if (e.getEventId() == id) {
-                e.setTitle(newTitle);
-                e.setDescription(newDesc);
-                e.setStartDateTime(newStart);
-                e.setEndDateTime(newEnd);
-                saveChanges();
-                return true;
-            }
+    // 冲突检测
+    public boolean checkConflict(LocalDateTime start, LocalDateTime end) {
+        for(Event e : getAllEventsCombined()) {
+            if(start.isBefore(e.getEndDateTime()) && end.isAfter(e.getStartDateTime())) return true;
         }
         return false;
     }
 
-    // 删除事件
-    public boolean deleteEvent(int id) {
-        boolean removed = events.removeIf(e -> e.getEventId() == id);
-        if (removed) saveChanges();
-        return removed;
-    }
-    
-    // 按关键词搜索
-    public List<Event> searchEvents(String keyword) {
-        return events.stream()
-                .filter(e -> e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
-                .collect(Collectors.toList());
-    }
-
-    // --- 按日期范围搜索 (Range Search) ---
-    public List<Event> searchEventsByDateRange(LocalDate start, LocalDate end) {
-        return events.stream()
-                .filter(e -> {
-                    LocalDate eventDate = e.getStartDateTime().toLocalDate();
-                    return !eventDate.isBefore(start) && !eventDate.isAfter(end);
-                })
-                .sorted(Comparator.comparing(Event::getStartDateTime))
-                .collect(Collectors.toList());
-    }
-    
-    // 获取特定月份事件 (用于日历视图)
-    public List<Event> getEventsByMonth(int year, int month) {
-        return events.stream()
-                .filter(e -> e.getStartDateTime().getYear() == year && e.getStartDateTime().getMonthValue() == month)
-                .sorted(Comparator.comparing(Event::getStartDateTime))
-                .collect(Collectors.toList());
-    }
-
-    // 重新加载数据 (用于还原后)
-    public void reloadData() {
-        this.events = FileManager.loadEvents();
-    }
-
-    public boolean backupData(java.io.File dest) {
-        return FileManager.backupFile(dest);
-    }
-
-    public boolean restoreData(java.io.File src) {
-        boolean success = FileManager.restoreFile(src);
-        if (success) reloadData();
-        return success;
-    }
-
-    private void saveChanges() {
+    public void addEvent(String t, String d, LocalDateTime s, LocalDateTime e) {
+        int id = events.stream().mapToInt(Event::getEventId).max().orElse(0) + 1;
+        events.add(new Event(id, t, d, s, e));
         FileManager.saveEvents(events);
     }
 
-    private int generateNextId() {
-        return events.stream().mapToInt(Event::getEventId).max().orElse(0) + 1;
+    public void addRecurrent(String t, String d, LocalDateTime s, LocalDateTime e, String f, int c) {
+        int id = recEvents.size() + 1;
+        recEvents.add(new RecurrentEvent(id, t, d, s, e, f, c));
+        FileManager.saveRecurrent(recEvents);
+    }
+
+    public void updateEvent(int id, String t, String d, LocalDateTime s, LocalDateTime e) {
+        for(Event ev : events) {
+            if(ev.getEventId() == id) {
+                ev.setTitle(t); ev.setDescription(d); ev.setStartDateTime(s); ev.setEndDateTime(e);
+                FileManager.saveEvents(events);
+                return;
+            }
+        }
+    }
+
+    public boolean deleteEvent(int id) {
+        boolean res = events.removeIf(e -> e.getEventId() == id);
+        if(res) FileManager.saveEvents(events);
+        return res;
+    }
+
+    public List<Event> search(String k) {
+        return getAllEventsCombined().stream()
+               .filter(e -> e.getTitle().toLowerCase().contains(k.toLowerCase()))
+               .collect(Collectors.toList());
+    }
+
+    public List<Event> getByMonth(int y, int m) {
+        return getAllEventsCombined().stream()
+               .filter(e -> e.getStartDateTime().getYear() == y && e.getStartDateTime().getMonthValue() == m)
+               .collect(Collectors.toList());
+    }
+    
+    public boolean backup(java.io.File f) { return FileManager.backup(f); }
+    public boolean restore(java.io.File f) { 
+        boolean res = FileManager.restore(f);
+        if(res) {
+            events = FileManager.loadEvents();
+            recEvents = FileManager.loadRecurrent();
+        }
+        return res;
     }
 }

@@ -8,8 +8,8 @@ public class Event {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     
-    // 统一的时间格式：yyyy-MM-dd HH:mm
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    // 统一的时间格式
+    public static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public Event(int eventId, String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.eventId = eventId;
@@ -19,27 +19,26 @@ public class Event {
         this.endDateTime = endDateTime;
     }
 
-    // --- Getters ---
+    // Getters
     public int getEventId() { return eventId; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public LocalDateTime getStartDateTime() { return startDateTime; }
     public LocalDateTime getEndDateTime() { return endDateTime; }
 
-    // --- Setters (新增：用于修改功能) ---
+    // Setters
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
     public void setStartDateTime(LocalDateTime startDateTime) { this.startDateTime = startDateTime; }
     public void setEndDateTime(LocalDateTime endDateTime) { this.endDateTime = endDateTime; }
 
-    // 转换为 CSV 格式
+    // CSV 转换
     public String toCsv() {
         return eventId + "," + title + "," + description + "," + 
                startDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "," + 
                endDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
-    // 从 CSV 解析
     public static Event fromCsv(String csvLine) {
         try {
             String[] parts = csvLine.split(",");
@@ -51,13 +50,13 @@ public class Event {
             LocalDateTime end = LocalDateTime.parse(parts[4], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             return new Event(id, title, desc, start, end);
         } catch (Exception e) {
-            return null; // 格式错误时跳过
+            return null;
         }
     }
     
     @Override
     public String toString() {
-        return String.format("[%d] %s (%s - %s): %s", 
-            eventId, title, startDateTime.format(FORMATTER), endDateTime.format(FORMATTER), description);
+        return String.format("[%d] %s (%s - %s)", 
+            eventId, title, startDateTime.format(FMT), endDateTime.format(DateTimeFormatter.ofPattern("HH:mm")));
     }
 }

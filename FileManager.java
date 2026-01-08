@@ -3,59 +3,70 @@ import java.nio.file.*;
 import java.util.*;
 
 public class FileManager {
-    private static final String FILE_NAME = "event.csv";
+    private static final String EVENT_FILE = "event.csv";
+    private static final String REC_FILE = "recurrent.csv";
 
-    // 读取所有事件
+    // 读写普通事件
     public static List<Event> loadEvents() {
-        List<Event> events = new ArrayList<>();
-        File file = new File(FILE_NAME);
-        
-        if (!file.exists()) return events; 
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            br.readLine(); // 跳过表头
-            while ((line = br.readLine()) != null) {
+        List<Event> list = new ArrayList<>();
+        File f = new File(EVENT_FILE);
+        if(!f.exists()) return list;
+        try(BufferedReader br = new BufferedReader(new FileReader(f))) {
+            String line; br.readLine(); 
+            while((line=br.readLine())!=null) {
                 Event e = Event.fromCsv(line);
-                if (e != null) events.add(e);
+                if(e!=null) list.add(e);
             }
-        } catch (IOException e) {
-            System.out.println("Error reading file: " + e.getMessage());
-        }
-        return events;
+        } catch(Exception e) { e.printStackTrace(); }
+        return list;
     }
 
-    // 保存所有事件
-    public static void saveEvents(List<Event> events) {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_NAME))) {
-            pw.println("eventId,title,description,startDateTime,endDateTime"); 
-            for (Event e : events) {
-                pw.println(e.toCsv());
+    public static void saveEvents(List<Event> list) {
+        try(PrintWriter pw = new PrintWriter(new FileWriter(EVENT_FILE))) {
+            pw.println("id,title,desc,start,end");
+            for(Event e : list) pw.println(e.toCsv());
+        } catch(Exception e) { e.printStackTrace(); }
+    }
+
+    // 读写重复事件
+    public static List<RecurrentEvent> loadRecurrent() {
+        List<RecurrentEvent> list = new ArrayList<>();
+        File f = new File(REC_FILE);
+        if(!f.exists()) return list;
+        try(BufferedReader br = new BufferedReader(new FileReader(f))) {
+            String line; br.readLine();
+            while((line=br.readLine())!=null) {
+                RecurrentEvent re = RecurrentEvent.fromCsv(line);
+                if(re!=null) list.add(re);
             }
-        } catch (IOException e) {
-            System.out.println("Error saving file: " + e.getMessage());
-        }
+        } catch(Exception e) { e.printStackTrace(); }
+        return list;
     }
 
-    // --- 备份功能 ---
-    public static boolean backupFile(File destination) {
+    public static void saveRecurrent(List<RecurrentEvent> list) {
+        try(PrintWriter pw = new PrintWriter(new FileWriter(REC_FILE))) {
+            pw.println("id,title,desc,start,end,freq,count");
+            for(RecurrentEvent re : list) pw.println(re.toCsv());
+        } catch(Exception e) { e.printStackTrace(); }
+    }
+    
+    // 备份
+    public static boolean backup(File dir) {
         try {
-            Files.copy(Paths.get(FILE_NAME), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            if(new File(EVENT_FILE).exists()) Files.copy(Paths.get(EVENT_FILE), new File(dir, "backup_event.csv").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            if(new File(REC_FILE).exists()) Files.copy(Paths.get(REC_FILE), new File(dir, "backup_recurrent.csv").toPath(), StandardCopyOption.REPLACE_EXISTING);
             return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        } catch(Exception e) { return false; }
     }
 
-    // --- 还原功能 ---
-    public static boolean restoreFile(File source) {
+    // 还原
+    public static boolean restore(File dir) {
         try {
-            Files.copy(source.toPath(), Paths.get(FILE_NAME), StandardCopyOption.REPLACE_EXISTING);
+            File ev = new File(dir, "backup_event.csv");
+            File re = new File(dir, "backup_recurrent.csv");
+            if(ev.exists()) Files.copy(ev.toPath(), Paths.get(EVENT_FILE), StandardCopyOption.REPLACE_EXISTING);
+            if(re.exists()) Files.copy(re.toPath(), Paths.get(REC_FILE), StandardCopyOption.REPLACE_EXISTING);
             return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        } catch(Exception e) { return false; }
     }
 }
