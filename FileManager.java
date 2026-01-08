@@ -10,11 +10,11 @@ public class FileManager {
         List<Event> events = new ArrayList<>();
         File file = new File(FILE_NAME);
         
-        if (!file.exists()) return events; // 如果文件不存在，返回空列表
+        if (!file.exists()) return events; 
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
-            br.readLine(); // 跳过标题行
+            br.readLine(); // 跳过表头
             while ((line = br.readLine()) != null) {
                 Event e = Event.fromCsv(line);
                 if (e != null) events.add(e);
@@ -28,7 +28,7 @@ public class FileManager {
     // 保存所有事件
     public static void saveEvents(List<Event> events) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_NAME))) {
-            pw.println("eventId,title,description,startDateTime,endDateTime"); // Header
+            pw.println("eventId,title,description,startDateTime,endDateTime"); 
             for (Event e : events) {
                 pw.println(e.toCsv());
             }
@@ -36,14 +36,26 @@ public class FileManager {
             System.out.println("Error saving file: " + e.getMessage());
         }
     }
-    
-    // 备份功能 (Bonus Mark)
-    public static void backupData(String backupPath) {
+
+    // --- 备份功能 ---
+    public static boolean backupFile(File destination) {
         try {
-            Files.copy(Paths.get(FILE_NAME), Paths.get(backupPath + "/event_backup.csv"), StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("Backup successful to " + backupPath);
+            Files.copy(Paths.get(FILE_NAME), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return true;
         } catch (IOException e) {
-            System.out.println("Backup failed: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // --- 还原功能 ---
+    public static boolean restoreFile(File source) {
+        try {
+            Files.copy(source.toPath(), Paths.get(FILE_NAME), StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

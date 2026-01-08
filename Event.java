@@ -8,7 +8,7 @@ public class Event {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     
-    // 统一的时间格式: yyyy-MM-dd HH:mm
+    // 统一的时间格式：yyyy-MM-dd HH:mm
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public Event(int eventId, String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime) {
@@ -19,30 +19,40 @@ public class Event {
         this.endDateTime = endDateTime;
     }
 
-    // Getters
+    // --- Getters ---
     public int getEventId() { return eventId; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public LocalDateTime getStartDateTime() { return startDateTime; }
     public LocalDateTime getEndDateTime() { return endDateTime; }
 
-    // 将对象转换为 CSV 格式字符串
+    // --- Setters (新增：用于修改功能) ---
+    public void setTitle(String title) { this.title = title; }
+    public void setDescription(String description) { this.description = description; }
+    public void setStartDateTime(LocalDateTime startDateTime) { this.startDateTime = startDateTime; }
+    public void setEndDateTime(LocalDateTime endDateTime) { this.endDateTime = endDateTime; }
+
+    // 转换为 CSV 格式
     public String toCsv() {
         return eventId + "," + title + "," + description + "," + 
                startDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "," + 
                endDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
-    // 从 CSV 字符串解析出对象
+    // 从 CSV 解析
     public static Event fromCsv(String csvLine) {
-        String[] parts = csvLine.split(",");
-        if (parts.length < 5) return null;
-        int id = Integer.parseInt(parts[0]);
-        String title = parts[1];
-        String desc = parts[2];
-        LocalDateTime start = LocalDateTime.parse(parts[3], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        LocalDateTime end = LocalDateTime.parse(parts[4], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        return new Event(id, title, desc, start, end);
+        try {
+            String[] parts = csvLine.split(",");
+            if (parts.length < 5) return null;
+            int id = Integer.parseInt(parts[0]);
+            String title = parts[1];
+            String desc = parts[2];
+            LocalDateTime start = LocalDateTime.parse(parts[3], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            LocalDateTime end = LocalDateTime.parse(parts[4], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            return new Event(id, title, desc, start, end);
+        } catch (Exception e) {
+            return null; // 格式错误时跳过
+        }
     }
     
     @Override
