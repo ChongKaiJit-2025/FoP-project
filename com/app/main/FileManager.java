@@ -4,8 +4,8 @@ import java.nio.file.*;
 import java.util.*;
 
 public class FileManager {
-    private static final String EVENT_FILE = "event.csv";
-    private static final String REC_FILE = "recurrent.csv";
+    private static final String EVENT_FILE = "com/app/dataevent.csv";
+    private static final String REC_FILE = "com/app/data/recurrent.csv";
 
     // 读写普通事件
     public static List<Event> loadEvents() {

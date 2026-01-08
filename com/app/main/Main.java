@@ -1,4 +1,5 @@
 package com.app.main;
+
 import java.awt.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -12,14 +13,14 @@ public class Main extends JFrame {
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public Main() {
-        setTitle("Calendar App 2025");
-        setSize(1000, 750);
+        setTitle("Nagoci V1.0");
+        setSize(700, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // 标题
-        JLabel titleLabel = new JLabel("📅 Personal Schedule System", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Personal Calendar and Schedule System", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         add(titleLabel, BorderLayout.NORTH);
         
@@ -44,13 +45,27 @@ public class Main extends JFrame {
         addButton(row2, "Add Recurring", e -> addRecur());
         addButton(row2, "Edit Event", e -> edit());
         addButton(row2, "Delete Event", e -> del());
+        addButton(row2, "Main Menu", e -> showMainMenu());
 
         btnPanel.add(row1);
         btnPanel.add(row2);
         add(btnPanel, BorderLayout.SOUTH);
         
-        area.setText("System Ready!\nClick 'Add Normal' to start.");
+        area.setText(mainMenuText);
     }
+
+    private final String mainMenuText = 
+        "Welcome to NaGoCi Calendar and Scheduler App by Nasi Goreng Cina!\n" +
+        "Use the buttons below to manage your days ahead.\n\n" +
+        " View Calendar: Show month view with events marked.\n" +
+        " List All: List all events in detail.\n" +
+        " Add Normal: Add a one-time event.\n" +
+        " Add Recurring: Add a repeating event.\n" +
+        " Edit Event: Modify an existing event by ID.\n" +
+        " Delete Event: Remove an event by ID.\n" +
+        " Search: Find events by keyword.\n" +
+        " Backup: Save data to a chosen directory.\n" +
+        " Restore: Load data from a chosen directory.";
 
     private void addButton(JPanel p, String t, java.awt.event.ActionListener l) {
         JButton b = new JButton(t);
@@ -59,8 +74,11 @@ public class Main extends JFrame {
         b.addActionListener(l);
         p.add(b);
     }
+    private void showMainMenu() {
+        area.setText(mainMenuText);
+    }
 
-    // --- 功能实现 ---
+    // --- Realising Functionality ---
     private void showCal() {
         try {
             String y = JOptionPane.showInputDialog("Year (e.g. 2025):"); if(y==null) return;
