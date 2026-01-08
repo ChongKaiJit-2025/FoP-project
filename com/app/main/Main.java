@@ -19,18 +19,18 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // 标题
+        // Label
         JLabel titleLabel = new JLabel("Personal Calendar and Schedule System", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         add(titleLabel, BorderLayout.NORTH);
         
-        // 显示区域
+        // Display Area
         area = new JTextArea();
         area.setFont(new Font("Monospaced", Font.PLAIN, 14));
         area.setEditable(false);
         add(new JScrollPane(area), BorderLayout.CENTER);
 
-        // 按钮面板
+        // Buttons
         JPanel btnPanel = new JPanel(new GridLayout(2, 1));
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));

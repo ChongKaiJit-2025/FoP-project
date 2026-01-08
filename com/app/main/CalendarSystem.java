@@ -1,5 +1,4 @@
 package com.app.main;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,7 +12,7 @@ public class CalendarSystem {
         this.recEvents = FileManager.loadRecurrent();
     }
 
-    // 合并所有事件（包括展开重复事件）
+    // Get all events including generated recurrent ones
     public List<Event> getAllEventsCombined() {
         List<Event> all = new ArrayList<>(events);
         for(RecurrentEvent re : recEvents) {
@@ -23,7 +22,7 @@ public class CalendarSystem {
         return all;
     }
 
-    // 冲突检测
+    // Conflict detection
     public boolean checkConflict(LocalDateTime start, LocalDateTime end) {
         for(Event e : getAllEventsCombined()) {
             if(start.isBefore(e.getEndDateTime()) && end.isAfter(e.getStartDateTime())) return true;

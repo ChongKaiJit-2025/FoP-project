@@ -42,14 +42,14 @@ public class RecurrentEvent {
         } catch (Exception e) { return null; }
     }
 
-    // 生成具体的事件列表
+    // Generate occurrences based on frequency and count
     public List<Event> generateOccurrences() {
         List<Event> list = new ArrayList<>();
         LocalDateTime currStart = startDateTime;
         LocalDateTime currEnd = endDateTime;
 
         for (int i = 0; i < repeatCount; i++) {
-            // ID = -1 表示这是一个生成的重复事件，不是存储在 event.csv 里的
+            // ID = -1 means generated occurrence which doesn't have its own ID
             list.add(new Event(-1, title + " (" + (i + 1) + ")", description, currStart, currEnd));
             if (frequency.equals("DAILY")) { currStart = currStart.plusDays(1); currEnd = currEnd.plusDays(1); }
             else if (frequency.equals("WEEKLY")) { currStart = currStart.plusWeeks(1); currEnd = currEnd.plusWeeks(1); }

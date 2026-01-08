@@ -9,7 +9,7 @@ public class Event {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     
-    // 统一的时间格式
+    // Uniform date-time format
     public static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public Event(int eventId, String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime) {
@@ -33,16 +33,16 @@ public class Event {
     public void setStartDateTime(LocalDateTime startDateTime) { this.startDateTime = startDateTime; }
     public void setEndDateTime(LocalDateTime endDateTime) { this.endDateTime = endDateTime; }
 
-    // CSV 转换
+    // CSV serialization
     public String toCsv() {
-        return eventId + "," + title + "," + description + "," + 
-               startDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "," + 
+        return eventId + ", " + title + ", " + description + "," + 
+               startDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + ", " + 
                endDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
     public static Event fromCsv(String csvLine) {
         try {
-            String[] parts = csvLine.split(",");
+            String[] parts = csvLine.split(", ");
             if (parts.length < 5) return null;
             int id = Integer.parseInt(parts[0]);
             String title = parts[1];
