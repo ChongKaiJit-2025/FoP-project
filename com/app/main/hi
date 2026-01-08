@@ -12,15 +12,15 @@ import javax.swing.text.StyledDocument;
 
 import com.app.basicfunction.CalendarSystem;
 import com.app.basicfunction.Event;
-import com.app.basicfunction.FileManager; // Ensure you have this class or remove import if unused
+import com.app.basicfunction.FileManager;
 import com.app.basicfunction.RecurrentEvent;
 import com.app.ui.GradientPanel;
 
+
 public class Main extends JFrame {
     private CalendarSystem sys = new CalendarSystem();
-    
-    // We only need ONE text pane. We will switch its mode between HTML and Plain text.
-    private JTextPane areaMenu; 
+    private JTextPane areaMenu;
+    private JTextArea area;
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -36,23 +36,16 @@ public class Main extends JFrame {
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         add(titleLabel, BorderLayout.NORTH);
         
-        // --- TEXT AREA SETUP ---
+        // Display Area with Gradient Background
+        area = new JTextArea();
         areaMenu = new JTextPane();
         areaMenu.setEditable(false);
         areaMenu.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        // IMPORTANT: Make it transparent so the GradientPanel shows through
-        areaMenu.setOpaque(false); 
 
-        // Wrap the JTextPane in a ScrollPane
-        JScrollPane scrollPane = new JScrollPane(areaMenu);
-        scrollPane.setOpaque(false); // Make scrollpane transparent
-        scrollPane.getViewport().setOpaque(false); // Make viewport transparent
-        scrollPane.setBorder(BorderFactory.createEmptyBorder()); // Optional: removes border
-
-        // Wrap the ScrollPane in your GradientPanel
+        // Wrap the JTextPane in a gradient panel
         GradientPanel centerPanel = new GradientPanel(Color.CYAN, Color.WHITE);
         centerPanel.setLayout(new BorderLayout());
-        centerPanel.add(scrollPane, BorderLayout.CENTER);
+        centerPanel.add(new JScrollPane(area), BorderLayout.CENTER);
         add(centerPanel, BorderLayout.CENTER);
 
         // Buttons
@@ -79,6 +72,19 @@ public class Main extends JFrame {
         showMainMenu();
     }
 
+    private final String mainMenuText = 
+        "Welcome to NaGoCi Calendar and Scheduler App by Nasi Goreng Cina!\n" +
+        "Use the buttons below to manage your days ahead.\n\n" +
+        " View Calendar: Show month view with events marked.\n" +
+        " List All: List all events in detail.\n" +
+        " Add Normal: Add a one-time event.\n" +
+        " Add Recurring: Add a repeating event.\n" +
+        " Edit Event: Modify an existing event by ID.\n" +
+        " Delete Event: Remove an event by ID.\n" +
+        " Search: Find events by keyword.\n" +
+        " Backup: Save data to a chosen directory.\n" +
+        " Restore: Load data from a chosen directory.";
+
     private void addButton(JPanel p, String t, java.awt.event.ActionListener l) {
         JButton b = new JButton(t);
         b.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -86,33 +92,29 @@ public class Main extends JFrame {
         b.addActionListener(l);
         p.add(b);
     }
-
     private void showMainMenu() {
-        // Switch to HTML for the pretty menu
-        areaMenu.setContentType("text/html");
-        // Reset font (HTML handles its own fonts, but good practice)
-        areaMenu.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        
-        String htmlText = """
-            <html>
-            <body style='text-align:center; font-family: SansSerif;'>
-                <h2 style='color:#2E8B57;'>Welcome to NaGoCi Calendar and Scheduler!</h2>
-                <p style='color:#555;'>Use the buttons below to manage your days ahead.</p>
-                <ul style='text-align:left; display:inline-block;'>
-                    <li>📅 View Calendar: Show month view with events marked</li>
-                    <li>📋 List All: List all events in detail</li>
-                    <li>➕ Add Normal: Add a one-time event</li>
-                    <li>🔁 Add Recurring: Add a repeating event</li>
-                    <li>✏️ Edit Event: Modify an existing event by ID</li>
-                    <li>❌ Delete Event: Remove an event by ID</li>
-                    <li>🔍 Search: Find events by keyword</li>
-                    <li>💾 Backup: Save data to a chosen directory</li>
-                    <li>📂 Restore: Load data from a chosen directory</li>
-                </ul>
-            </body>
-            </html>
-            """;
+    areaMenu.setContentType("text/html");
+    String htmlText = """
+        <html>
+        <body style='text-align:center; font-family: SansSerif;'>
+            <h2 style='color:#2E8B57;'>Welcome to NaGoCi Calendar and Scheduler!</h2>
+            <p style='color:#555;'>Use the buttons below to manage your days ahead.</p>
+            <ul style='text-align:left; display:inline-block;'>
+                <li>📅 View Calendar: Show month view with events marked</li>
+                <li>📋 List All: List all events in detail</li>
+                <li>➕ Add Normal: Add a one-time event</li>
+                <li>🔁 Add Recurring: Add a repeating event</li>
+                <li>✏️ Edit Event: Modify an existing event by ID</li>
+                <li>❌ Delete Event: Remove an event by ID</li>
+                <li>🔍 Search: Find events by keyword</li>
+                <li>💾 Backup: Save data to a chosen directory</li>
+                <li>📂 Restore: Load data from a chosen directory</li>
+            </ul>
+        </body>
+        </html>
+        """;
         areaMenu.setText(htmlText);
+        areaMenu.setEditable(false);
     }
 
     // --- Realising Functionality ---
@@ -139,12 +141,7 @@ public class Main extends JFrame {
             }
             sb.append("\n\nEvents:\n");
             for(Event e : evs) sb.append(e).append("\n");
-            
-            // FIX: Use areaMenu and switch to Plain Text + Monospaced Font
-            areaMenu.setContentType("text/plain");
-            areaMenu.setFont(new Font("Monospaced", Font.PLAIN, 14));
-            areaMenu.setText(sb.toString());
-
+            area.setText(sb.toString());
         } catch(Exception e) { JOptionPane.showMessageDialog(this, "Input Error!"); }
     }
 
@@ -160,11 +157,7 @@ public class Main extends JFrame {
                 e.getEndDateTime().format(DateTimeFormatter.ofPattern("HH:mm")),
                 e.getDescription()));
         }
-        
-        // FIX: Use areaMenu and switch to Plain Text + Monospaced Font
-        areaMenu.setContentType("text/plain");
-        areaMenu.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        areaMenu.setText(sb.toString());
+        area.setText(sb.toString());
     }
 
     private void addNormal() {
@@ -229,11 +222,7 @@ public class Main extends JFrame {
         if(k!=null) {
             StringBuilder sb = new StringBuilder("Search Results:\n");
             for(Event e : sys.search(k)) sb.append(e).append("\n");
-            
-            // FIX: Use areaMenu and switch to Plain Text
-            areaMenu.setContentType("text/plain");
-            areaMenu.setFont(new Font("Monospaced", Font.PLAIN, 12));
-            areaMenu.setText(sb.toString());
+            area.setText(sb.toString());
         }
     }
 
