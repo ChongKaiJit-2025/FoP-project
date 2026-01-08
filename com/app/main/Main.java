@@ -6,10 +6,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+
+import com.app.basicfunction.CalendarSystem;
+import com.app.basicfunction.Event;
+import com.app.basicfunction.FileManager;
+import com.app.basicfunction.RecurrentEvent;
+import com.app.ui.GradientPanel;
+
 
 public class Main extends JFrame {
     private CalendarSystem sys = new CalendarSystem();
-    private JTextArea area;
+    private JTextPane area;
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public Main() {
@@ -24,11 +34,16 @@ public class Main extends JFrame {
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         add(titleLabel, BorderLayout.NORTH);
         
-        // Display Area
-        area = new JTextArea();
-        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        // Display Area with Gradient Background
+        area = new JTextPane();
         area.setEditable(false);
-        add(new JScrollPane(area), BorderLayout.CENTER);
+        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+
+        // Wrap the JTextPane in a gradient panel
+        GradientPanel centerPanel = new GradientPanel(Color.CYAN, Color.WHITE);
+        centerPanel.setLayout(new BorderLayout());
+        centerPanel.add(new JScrollPane(area), BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
 
         // Buttons
         JPanel btnPanel = new JPanel(new GridLayout(2, 1));
@@ -50,8 +65,8 @@ public class Main extends JFrame {
         btnPanel.add(row1);
         btnPanel.add(row2);
         add(btnPanel, BorderLayout.SOUTH);
-        
-        area.setText(mainMenuText);
+
+        showMainMenu();
     }
 
     private final String mainMenuText = 
@@ -75,7 +90,28 @@ public class Main extends JFrame {
         p.add(b);
     }
     private void showMainMenu() {
-        area.setText(mainMenuText);
+    area.setContentType("text/html");
+    String htmlText = """
+        <html>
+        <body style='text-align:center; font-family: SansSerif;'>
+            <h2 style='color:#2E8B57;'>Welcome to NaGoCi Calendar and Scheduler!</h2>
+            <p style='color:#555;'>Use the buttons below to manage your days ahead.</p>
+            <ul style='text-align:left; display:inline-block;'>
+                <li>📅 View Calendar: Show month view with events marked</li>
+                <li>📋 List All: List all events in detail</li>
+                <li>➕ Add Normal: Add a one-time event</li>
+                <li>🔁 Add Recurring: Add a repeating event</li>
+                <li>✏️ Edit Event: Modify an existing event by ID</li>
+                <li>❌ Delete Event: Remove an event by ID</li>
+                <li>🔍 Search: Find events by keyword</li>
+                <li>💾 Backup: Save data to a chosen directory</li>
+                <li>📂 Restore: Load data from a chosen directory</li>
+            </ul>
+        </body>
+        </html>
+        """;
+        area.setText(htmlText);
+        area.setEditable(false);
     }
 
     // --- Realising Functionality ---
