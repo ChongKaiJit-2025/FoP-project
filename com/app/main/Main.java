@@ -1,9 +1,10 @@
-import javax.swing.*;
+package com.app.main;
 import java.awt.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.*;
+import java.util.List;
+import javax.swing.*;
 
 public class Main extends JFrame {
     private CalendarSystem sys = new CalendarSystem();
